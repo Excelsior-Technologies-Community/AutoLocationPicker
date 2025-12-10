@@ -14,73 +14,38 @@ object AutoLocationPicker {
 
     private lateinit var repository: LocationRepository
 
-    // ✅ Must be called once from App
     fun init(context: Context) {
         repository = LocationRepository(context.applicationContext)
     }
 
-    // ✅ Get Countries
-    fun getCountries(
-        forceRefresh: Boolean = false,
-        onResult: (List<CountryEntity>) -> Unit,
-        onError: (Throwable) -> Unit = {}
-    ) {
+    fun getCountries(onResult: (List<CountryEntity>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-//                val countries = repository.getCountries(forceRefresh)
-                val countries = repository.getCountries()
-                withContext(Dispatchers.Main) {
-                    onResult(countries)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    onError(e)
-                }
-            }
+            val result = repository.getCountries()
+            withContext(Dispatchers.Main) { onResult(result) }
         }
     }
 
-    // ✅ Get States
     fun getStates(
+        countryName: String,
         countryId: Int,
-        forceRefresh: Boolean = false,
-        onResult: (List<StateEntity>) -> Unit,
-        onError: (Throwable) -> Unit = {}
+        onResult: (List<StateEntity>) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-//                val states = repository.getStates(countryId, forceRefresh)
-                val states = repository.getStates(countryId)
-                withContext(Dispatchers.Main) {
-                    onResult(states)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    onError(e)
-                }
-            }
+            val result = repository.getStates(countryName, countryId)
+            withContext(Dispatchers.Main) { onResult(result) }
         }
     }
 
-    // ✅ Get Cities
     fun getCities(
+        countryName: String,
+        stateName: String,
         stateId: Int,
-        forceRefresh: Boolean = false,
-        onResult: (List<CityEntity>) -> Unit,
-        onError: (Throwable) -> Unit = {}
+        onResult: (List<CityEntity>) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-//                val cities = repository.getCities(stateId, forceRefresh)
-                val cities = repository.getCities(stateId)
-                withContext(Dispatchers.Main) {
-                    onResult(cities)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    onError(e)
-                }
-            }
+            val result = repository.getCities(countryName, stateName, stateId)
+            withContext(Dispatchers.Main) { onResult(result) }
         }
     }
 }
+

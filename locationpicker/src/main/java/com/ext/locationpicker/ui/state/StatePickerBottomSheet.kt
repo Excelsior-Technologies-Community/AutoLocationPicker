@@ -12,7 +12,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class StatePickerBottomSheet(
     private val countryId: Int,
-    private val onSelect: (String, Int) -> Unit
+    private val countryName: String,
+    private val onSelect: (stateName: String, stateId: Int) -> Unit
 ) : BottomSheetDialogFragment() {
 
     private lateinit var binding: BottomsheetPickerBinding
@@ -30,9 +31,10 @@ class StatePickerBottomSheet(
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         AutoLocationPicker.getStates(
+            countryName = countryName,
             countryId = countryId,
             onResult = { list ->
-                val names = list.map { it.name }
+            val names = list.map { it.name }
 
                 val adapter = SimplePickerAdapter(names) { name, pos ->
                     onSelect(name, list[pos].id)

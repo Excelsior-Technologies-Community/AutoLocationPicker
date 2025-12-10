@@ -11,6 +11,8 @@ import com.ext.locationpicker.ui.common.SimplePickerAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class CityPickerBottomSheet(
+    private val countryName: String,
+    private val stateName: String,
     private val stateId: Int,
     private val onSelect: (String) -> Unit
 ) : BottomSheetDialogFragment() {
@@ -30,6 +32,8 @@ class CityPickerBottomSheet(
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         AutoLocationPicker.getCities(
+            countryName = countryName,
+            stateName = stateName,
             stateId = stateId,
             onResult = { list ->
                 val names = list.map { it.name }

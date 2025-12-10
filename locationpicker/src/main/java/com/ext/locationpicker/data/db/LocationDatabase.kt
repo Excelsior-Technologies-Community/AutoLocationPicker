@@ -32,7 +32,7 @@ abstract class LocationDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     LocationDatabase::class.java,
-                    "location_picker_db_v2" // ✅ changed name to force rebuild
+                    "location_picker_db_v3" // ✅ changed name to force rebuild
                 ).addCallback(object : RoomDatabase.Callback() {
 
                     override fun onCreate(db: SupportSQLiteDatabase) {

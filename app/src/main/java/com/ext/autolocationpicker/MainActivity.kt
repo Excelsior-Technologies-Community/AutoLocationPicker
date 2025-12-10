@@ -18,8 +18,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnState: Button
     private lateinit var btnCity: Button
 
-    private var selectedCountryId: Int = 0
-    private var selectedStateId: Int = 0
+    private var selectedCountryId = 0
+    private var selectedStateId = 0
+    private var selectedCountryName = ""
+    private var selectedStateName = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,8 +39,12 @@ class MainActivity : AppCompatActivity() {
 
         btnCountry.setOnClickListener {
             CountryPickerBottomSheet { name, id ->
+                selectedCountryName = name
                 selectedCountryId = id
                 btnCountry.text = name
+
+                selectedStateId = 0
+                selectedStateName = ""
                 btnState.text = "Select State"
                 btnCity.text = "Select City"
             }.show(supportFragmentManager, "country")
@@ -48,9 +55,14 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            StatePickerBottomSheet(selectedCountryId) { name, id ->
+            StatePickerBottomSheet(
+                countryId = selectedCountryId,
+                countryName = selectedCountryName
+            ) { name, id ->
+                selectedStateName = name
                 selectedStateId = id
                 btnState.text = name
+
                 btnCity.text = "Select City"
             }.show(supportFragmentManager, "state")
         }
@@ -61,7 +73,11 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            CityPickerBottomSheet(selectedStateId) { name ->
+            CityPickerBottomSheet(
+                countryName = selectedCountryName,
+                stateName = selectedStateName,
+                stateId = selectedStateId
+            ) { name ->
                 btnCity.text = name
             }.show(supportFragmentManager, "city")
         }

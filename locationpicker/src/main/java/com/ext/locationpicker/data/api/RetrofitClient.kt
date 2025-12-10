@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://your-api-url.com/api/"
+    private const val BASE_URL = "https://countriesnow.space/api/v0.1/"
 
     val api: LocationApiService by lazy {
         Retrofit.Builder()

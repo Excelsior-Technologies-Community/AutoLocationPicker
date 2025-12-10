@@ -11,7 +11,7 @@ import com.ext.locationpicker.ui.common.SimplePickerAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class CountryPickerBottomSheet(
-    private val onSelect: (String, Int) -> Unit
+    private val onSelect: (countryName: String, countryId: Int) -> Unit
 ) : BottomSheetDialogFragment() {
 
     private lateinit var binding: BottomsheetPickerBinding

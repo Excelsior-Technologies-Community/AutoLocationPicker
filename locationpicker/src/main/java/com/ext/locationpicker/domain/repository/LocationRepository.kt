@@ -1,7 +1,9 @@
 package com.ext.locationpicker.domain.repository
 
 import android.content.Context
+import com.ext.locationpicker.data.api.CountryRequest
 import com.ext.locationpicker.data.api.RetrofitClient
+import com.ext.locationpicker.data.api.StateRequest
 import com.ext.locationpicker.data.db.LocationDatabase
 import com.ext.locationpicker.data.db.entity.CityEntity
 import com.ext.locationpicker.data.db.entity.CountryEntity
@@ -15,117 +17,60 @@ class LocationRepository(context: Context) {
     private val api = RetrofitClient.api
     private val dao = LocationDatabase.getInstance(context).locationDao()
 
-    // ✅ COUNTRIES
-//    suspend fun getCountries(forceRefresh: Boolean = false): List<CountryEntity> {
-//        return try {
-//            if (forceRefresh) {
-//                syncCountries()
-//            }
-//
-//            val local = dao.getCountries()
-//            if (local.isNotEmpty()) {
-//                local
-//            } else {
-//                syncCountries()
-//                dao.getCountries()
-//            }
-//
-//        } catch (e: Exception) {
-//            dao.getCountries() // fallback to cache
-//        }
-//    }
-
+    // ✅ COUNTRIES (API → ROOM → UI)
     suspend fun getCountries(): List<CountryEntity> {
-        return dao.getCountries()
+        return try {
+            val response = api.getCountries()
+
+            val countries = response.data.mapIndexed { index, item ->
+                CountryEntity(
+                    id = index + 1,
+                    name = item.country, // ✅ FIX IS HERE
+                    iso2 = item.country.take(2).uppercase()
+                )
+            }
+
+            dao.clearCountries()
+            dao.insertCountries(countries)
+            dao.getCountries()
+
+        } catch (e: Exception) {
+            // ✅ Offline fallback
+            dao.getCountries()
+        }
     }
 
 
     // ✅ STATES
-//    suspend fun getStates(countryId: Int, forceRefresh: Boolean = false): List<StateEntity> {
-//        return try {
-//            if (forceRefresh) {
-//                syncStates(countryId)
-//            }
-//
-//            val local = dao.getStates(countryId)
-//            if (local.isNotEmpty()) {
-//                local
-//            } else {
-//                syncStates(countryId)
-//                dao.getStates(countryId)
-//            }
-//
-//        } catch (e: Exception) {
-//            dao.getStates(countryId)
-//        }
-//    }
+    suspend fun getStates(countryName: String, countryId: Int): List<StateEntity> {
+        return try {
+            val response = api.getStates(CountryRequest(countryName))
 
-    suspend fun getStates(countryId: Int): List<StateEntity> {
-        return dao.getStates(countryId)
+            val states = response.data.states.mapIndexed { index, item ->
+                StateEntity(index + 1, item.name, countryId)
+            }
+            dao.clearStates()
+            dao.insertStates(states)
+            dao.getStates(countryId)
+        } catch (e: Exception) {
+            dao.getStates(countryId)
+        }
     }
-
 
     // ✅ CITIES
-//    suspend fun getCities(stateId: Int, forceRefresh: Boolean = false): List<CityEntity> {
-//        return try {
-//            if (forceRefresh) {
-//                syncCities(stateId)
-//            }
-//
-//            val local = dao.getCities(stateId)
-//            if (local.isNotEmpty()) {
-//                local
-//            } else {
-//                syncCities(stateId)
-//                dao.getCities(stateId)
-//            }
-//
-//        } catch (e: Exception) {
-//            dao.getCities(stateId)
-//        }
-//    }
+    suspend fun getCities(countryName: String, stateName: String, stateId: Int): List<CityEntity> {
+        return try {
+            val response = api.getCities(StateRequest(countryName, stateName))
 
-    suspend fun getCities(stateId: Int): List<CityEntity> {
-        return dao.getCities(stateId)
-    }
-
-
-    // ✅ SYNC FROM API → ROOM
-
-    private suspend fun syncCountries() {
-        val response: List<Country> = api.getCountries()
-        val entities = response.map {
-            CountryEntity(
-                id = it.id,
-                name = it.name,
-                iso2 = it.iso2
-            )
+            val cities = response.data.mapIndexed { index, name ->
+                CityEntity(index + 1, name, stateId)
+            }
+            dao.clearCities()
+            dao.insertCities(cities)
+            dao.getCities(stateId)
+        } catch (e: Exception) {
+            dao.getCities(stateId)
         }
-        dao.clearCountries()
-        dao.insertCountries(entities)
-    }
-
-    private suspend fun syncStates(countryId: Int) {
-        val response: List<State> = api.getStates(countryId)
-        val entities = response.map {
-            StateEntity(
-                id = it.id,
-                name = it.name,
-                countryId = it.countryId
-            )
-        }
-        dao.insertStates(entities)
-    }
-
-    private suspend fun syncCities(stateId: Int) {
-        val response: List<City> = api.getCities(stateId)
-        val entities = response.map {
-            CityEntity(
-                id = it.id,
-                name = it.name,
-                stateId = it.stateId
-            )
-        }
-        dao.insertCities(entities)
     }
 }
+
