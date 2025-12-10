@@ -30,6 +30,7 @@ class StatePickerBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.tvTitle.text = "Select State"
 
         AutoLocationPicker.getStates(
             countryName = countryName,

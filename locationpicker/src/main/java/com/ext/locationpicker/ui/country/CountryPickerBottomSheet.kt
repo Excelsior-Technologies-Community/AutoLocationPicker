@@ -28,6 +28,7 @@ class CountryPickerBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.tvTitle.text = "Select Country"
 
         AutoLocationPicker.getCountries(
             onResult = { list ->
